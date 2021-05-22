@@ -1,0 +1,499 @@
+<script src="https://www.dukelearntoprogram.com/course1/common/js/image/SimpleImage.js">
+</script>
+<div id="main-div">
+  <h1>Filter Fun</h1>
+  <p>
+  Canvas width:
+  <input type="range" id="inputCanvasWidth" min="200" max="800" step="5" oninput="resizeCanvas(parseInt(this.value))">:  
+    <output id="canvasWidthOut" class="digtxt"></output></p>
+    <p>Canvas height:
+  <input type="range" id="inputCanvasHeight" min="100" max="500" step="5" oninput="resizeCanvash(parseInt(this.value))">:  
+      <output id="canvasHeightOut" class="digtxt"></output></p>
+ </p>
+
+  <canvas id="can1">
+  </canvas>
+  <canvas id="can2">
+</canvas></p>
+   Chose Image:
+    <input id="image" type="file" multiple="false" accept="image/*" onchange="loadImage()" />
+  </p>
+  <input id="GreyScale" type="button" class = "regrey" value = "GreyScale" onclick="makeGrey()" />
+  <input id="redFilter" type="button" class = "rered" value = "Red"  onclick="makeRed()" />
+    <input id="greenFilter" type="button" class = "regreen" value = "Green" onclick="makeGreen()" />
+    <input id="blueFilter" type="button" class = "reblue" value = "Blue" onclick="makeBlue()" />
+    <input id="sepiaFilter" type="button" class = "resepia" value = "Sepia" onclick="makeSepia()" />
+    <input id="rainbowFilter" type="button" class = "rerainbow" value = "Rainbow 🌈" onclick="makeRainbow()" />
+<p>
+Click Hearts to add Hearts (works best for a png image)<img class="png" id="liz" onclick="doPic()" src="https://th.bing.com/th/id/R6d06f3520a6c5bfe03e654e42a3c4bc0?rik=j3ctJdBDzwS%2bDQ&riu=http%3a%2f%2fclipart-library.com%2fimages_k%2fhearts-png-transparent%2fhearts-png-transparent-8.png&ehk=HbBlIxDJvZGIvGoH3YL%2f%2ffKW67lFS2HYMG%2fM%2fsnv%2bRo%3d&risl=&pid=ImgRaw" alt="Hearts" width="80" height="80">
+
+</p>
+<p>
+   <input id="invertFilter" type="button" value = "Invert the Image Colors" class = "reinvert" onclick="makeInvert()" />
+</p>
+    <div id=divApplyBlur>
+    <span class="subDivInfoLabel">Blur:</span>    
+    <span class="Unbreakable">Intensity:<input type="range" id="inputBlurIntensity" min="30" max="100" step="1" oninput="changeBlurIntensity(parseInt(this.value))">:  
+    <output id="blurIntensOut" class="digtxt"></output></span>
+
+    <span class="Unbreakable">Radius:<input type="range" id="inputBlurRadius" min="1" max="20" step="1" oninput="changeBlurRadius(parseInt(this.value))">:  
+      <output id="blurRadiusOut" class="digtxt"></output></span>
+      <input type="button" id="bnMakeBlur" value="Click to Apply" class = "re" onclick="doBlur()">
+    
+  </div> 
+ <p>  
+   ☀️ Brightness:
+ <input type="range" value="0" min="-200" max="200" id="brightSli" onchange="fBright()" />🌑
+  </p>
+<p> 
+  </p>
+ <input type="button" value = "Add Window Panes" class = "re1" onclick = "doWindow()" >
+    
+  <input type="range" onchange = "getThickness1()"  min = "0" max = "50" value = "0" id="rangeinput1">
+    
+  <input type="color" onchange = "getColor1()"  id="clrinput1">
+  </p>
+</p>
+ <input id="clear" type="button" value = "Clear Canvas⛔"
+        class = "re" onclick="clearCanvas()" /> and then reset (for a new image)
+<input class="re" type="button" value="Reset   🔄" class = "re" onclick="reset()">
+  </p>
+body {
+  background-color:#ffb366;
+}
+canvas {
+  height: 100px;
+  width: 300px;
+  margin: 10px;
+  border: 10px solid;
+  border-color:  #0099ff;
+}
+
+input {
+  font-size: 14pt;
+  }
+.divInfoLabel{
+  color: DarkSlateBlue;
+  font-weight: bold;  
+  margin-right: 20px;
+}
+.subDivInfoLabel {
+  color: DarkBlue;  
+}
+
+.Unbreakable {
+  white-space: nowrap;
+}
+#divApplyBlur {
+  max-width: 560px;
+}
+div {
+  border: 1px solid gray;  
+  padding: 6px;
+  padding-right: 2px;
+  border-radius: 10px;  
+  background-color: #ffb366;
+  margin-bottom: 4px;
+}
+.re {background-color: green; color:white; margin:10px;}
+.re1 {background-color: red; color:white; margin:10px;}
+.re2 {background-color: yellow; color:black; margin:10px;}
+.regrey {background-color: grey; color:white; margin:10px;}
+.rered {background-color: red; color:white; margin:10px;}
+.regreen {background-color: green; color:white; margin:10px;}
+.reblue {background-color: blue; color:white; margin:10px;}
+.resepia {background-color: #704214; color:white; margin:10px;}
+.rerainbow {background-color: violet; color:white; margin:10px;}
+.reinvert {background-color: black; color:white; margin:10px;}
+
+var imageGrey;
+var imageOrg;
+var orgImage = null;
+var grayImage = null;
+var imgCurrWidthOut = document.getElementById("imgWidthOut");
+var imgCurrHeightOut = document.getElementById("imgHeightOut");
+var canvasWidthOut = document.getElementById("canvasWidthOut");
+var canvasHeightOut = document.getElementById("canvasHeightOut");
+var blurIntensOut = document.getElementById("blurIntensOut");
+var blurRadiusOut = document.getElementById("blurRadiusOut");
+var framethickness;
+var framecolor;
+var framecolor1;
+var framethickness1;
+
+function resizeCanvas(newWidth) {
+  var cnv1 = document.getElementById("can1");
+  var cnv2 = document.getElementById("can2");
+  cnv1.style.width = newWidth + 'px';
+  cnv2.style.width = newWidth + 'px';
+  outCanvasSize();
+}
+function outCanvasSize() {
+  var cnv1 = document.getElementById("can1");
+  var cnv2 = document.getElementById("can2");
+  canvasWidthOut.value = cnv1.style.width;
+  canvasWidthOut.value = cnv2.style.width;
+}
+
+function resizeCanvash(newHeight) {
+  var cnv1 = document.getElementById("can1");
+  var cnv2 = document.getElementById("can2");
+  cnv1.style.height = newHeight + 'px';
+  cnv2.style.height = newHeight + 'px';
+  outCanvasSizeh();
+}
+function outCanvasSizeh() {
+  var cnv1 = document.getElementById("can1");
+  var cnv2 = document.getElementById("can2");
+  canvasHeightOut.value = cnv1.style.height;
+  canvasHeightOut.value = cnv2.style.height;
+}
+
+function loadImage() {
+  ImageCanvas = document.getElementById("can1");
+  var fileinput = document.getElementById("image");
+  imageOrg = new SimpleImage(fileinput);
+  imageGrey = new SimpleImage(fileinput);
+  imageOrg.drawTo(ImageCanvas);
+}
+
+
+function makeGrey() {
+for (var pixel of imageGrey.values()) {
+    var ave = (pixel.getRed() + pixel.getGreen() + pixel.getBlue())/3;
+        pixel.setRed(ave);
+        pixel.setGreen(ave);
+        pixel.setBlue(ave);  
+}
+  var canvasimage = document.getElementById("can2");
+  imageGrey.drawTo(canvasimage);
+}
+
+function makeRed() {
+for (var pixel of imageGrey.values()) {
+    var ave = (pixel.getRed() + pixel.getGreen() + pixel.getBlue())/3;
+  if (ave < 128) {
+        pixel.setRed(2*ave);
+        pixel.setGreen(0);
+        pixel.setBlue(0);  
+   }
+  else{pixel.setRed(255);
+        pixel.setGreen(2*ave - 255);
+        pixel.setBlue(2*ave - 255);
+      } 
+  }
+  var canvasimage = document.getElementById("can2");
+  imageGrey.drawTo(canvasimage);
+}
+function makeBlue() {
+for (var pixel of imageGrey.values()) {
+    var ave = (pixel.getRed() + pixel.getGreen() + pixel.getBlue())/3;
+  if (ave < 128) {
+        pixel.setBlue(2*ave);
+        pixel.setGreen(0);
+        pixel.setRed(0);  
+   }
+  else{pixel.setBlue(255);
+        pixel.setGreen(2*ave - 255);
+        pixel.setRed(2*ave - 255);
+      } 
+  }
+  var canvasimage = document.getElementById("can2");
+  imageGrey.drawTo(canvasimage);
+}
+function makeGreen() {
+for (var pixel of imageGrey.values()) {
+    var ave = (pixel.getRed() + pixel.getGreen() + pixel.getBlue())/3;
+  if (ave < 128) {
+        pixel.setGreen(2*ave);
+        pixel.setRed(0);
+        pixel.setBlue(0);  
+   }
+  else{pixel.setGreen(255);
+        pixel.setRed(2*ave - 255);
+        pixel.setBlue(2*ave - 255);
+      } 
+  }
+  var canvasimage = document.getElementById("can2");
+  imageGrey.drawTo(canvasimage);
+}
+function makeSepia() {
+
+  for (var pixel of imageGrey.values()) {
+    var red = (pixel.getRed() + 112 + pixel.getRed())/2;
+    var green = (pixel.getGreen() + 66 + pixel.getGreen())/2;
+    var blue = (pixel.getBlue() + 20 + pixel.getBlue())/2;
+    var outpix = 
+    pixel.setRed(red);
+    pixel.setBlue(blue);
+    pixel.setGreen(green);
+  }
+var canvasimage = document.getElementById("can2");
+  imageGrey.drawTo(canvasimage);
+}
+function filterRed(pixel) {
+  var avg = (pixel.getRed() + pixel.getGreen() + pixel.getBlue())/3;
+    if(avg < 128) {
+      pixel.setRed(2*avg);
+      pixel.setGreen(0);
+      pixel.setBlue(0);
+    }
+    else {
+      pixel.setRed(255);
+      pixel.setGreen(2*avg - 255);
+      pixel.setBlue(2*avg - 255);
+    }
+}
+
+function filterOrange(pixel) {
+  var avg = (pixel.getRed() + pixel.getGreen() + pixel.getBlue())/3;
+    if(avg < 128) {
+      pixel.setRed(2*avg);
+      pixel.setGreen(avg);
+      pixel.setBlue(0);
+    }
+    else {
+      pixel.setRed(255);
+      pixel.setGreen(avg);
+      pixel.setBlue(2*avg - 255);
+    }
+}
+
+function filterYellow(pixel) {
+  var avg = (pixel.getRed() + pixel.getGreen() + pixel.getBlue())/3;
+    if(avg < 128) {
+      pixel.setRed(2*avg);
+      pixel.setGreen(2*avg);
+      pixel.setBlue(0);
+    }
+    else {
+      pixel.setRed(255);
+      pixel.setGreen(255);
+      pixel.setBlue(2*avg - 255);
+    }
+}
+
+function filterGreen(pixel) {
+  var avg = (pixel.getRed() + pixel.getGreen() + pixel.getBlue())/3;
+    if(avg < 128) {
+      pixel.setRed(0);
+      pixel.setGreen(2*avg);
+      pixel.setBlue(0);
+    }
+    else {
+      pixel.setRed(2*avg - 255);
+      pixel.setGreen(255);
+      pixel.setBlue(2*avg - 255);
+    }
+}
+
+function filterBlue(pixel) {
+  var avg = (pixel.getRed() + pixel.getGreen() + pixel.getBlue())/3;
+    if(avg < 128) {
+      pixel.setRed(0);
+      pixel.setGreen(0);
+      pixel.setBlue(2*avg);
+    }
+    else {
+      pixel.setRed(2*avg - 255);
+      pixel.setGreen(2*avg - 255);
+      pixel.setBlue(255);
+    }
+}
+
+function filterIndigo(pixel) {
+  var avg = (pixel.getRed() + pixel.getGreen() + pixel.getBlue())/3;
+    if(avg < 128) {
+      pixel.setRed(avg);
+      pixel.setGreen(0);
+      pixel.setBlue(2*avg);
+    }
+    else {
+      pixel.setRed(avg);
+      pixel.setGreen(2*avg - 255);
+      pixel.setBlue(255);
+    }
+}
+
+function filterViolet(pixel) {
+  var avg = (pixel.getRed() + pixel.getGreen() + pixel.getBlue())/3;
+    if(avg < 128) {
+      pixel.setRed(1.76*avg);
+      pixel.setGreen(0.7*avg);
+      pixel.setBlue(1.76*avg);
+    }
+    else {
+      pixel.setRed(0.7*avg);
+      pixel.setGreen(255 - 1.76*avg);
+      pixel.setBlue(0.7*avg);
+    }
+}
+function makeRainbow() {
+  var img = new SimpleImage(imageGrey);
+  var canvas = document.getElementById("can2");
+  makeGrey();
+  for(var pixel of img.values()) {
+    var y = pixel.getY();
+    var division = canvas.height / 7;
+    
+    //Red
+    if(y < division) {
+      filterRed(pixel);
+    }
+    //Orange
+    else if(y < 2*division) {
+      filterOrange(pixel);
+    }
+    //Yellow
+    else if(y < 3*division) {
+      filterYellow(pixel);
+    }
+    //Green
+    else if(y < 4*division) {
+      filterGreen(pixel);
+    }
+    //Blue
+    else if(y < 5*division) {
+      filterBlue(pixel);
+    }
+    //Indigo
+    else if(y < 6*division) {
+      filterIndigo(pixel);
+    }
+    //Violet
+    else {
+      filterViolet(pixel);}
+    }
+  img.drawTo(canvas);
+}
+  
+function changeBlurIntensity(newIntens) {
+  blurIntensOut.value = newIntens;  
+}
+function changeBlurRadius(newRadius) {
+  blurRadiusOut.value = newRadius;
+}
+
+function doBlur() {
+  
+  var blurR = blurRadiusOut.value;  
+  var intens = blurIntensOut.value / 100;
+  var imgModif = imageGrey;
+  var W = imgModif.getWidth();
+  var H = imgModif.getHeight();
+  
+  var imgB = new SimpleImage(W, H);  
+  for (var pix of imgModif.values()) {
+    var x = pix.getX();
+    var y = pix.getY();
+    if (Math.random() > intens) {
+      imgB.setPixel(x, y, pix);
+    } else
+    {  //scramble      
+      var srcX = x + blurR * Math.round((Math.random() - 0.5) / 0.5);    
+      var srcY = y + blurR * Math.round((Math.random() - 0.5) / 0.5);
+      if ((srcX >= 0) && (srcX < W) && (srcY >= 0) && (srcY < H)) {
+        imgB.setPixel(x, y, imgModif.getPixel(srcX, srcY));
+      } else {  //out of range, copy original
+        imgB.setPixel(x, y, pix);        
+      }
+    }
+  }  
+  imgModif = imgB;
+  var canvasimage = document.getElementById("can2");
+  imgB.drawTo(canvasimage);
+  //drawOnCanvas(imgModif);
+}
+function fBright() {
+  
+  //var img = new SimpleImage(imageGrey);
+  for(var pixel of imageGrey.values()) {
+    var slider = document.getElementById("brightSli");
+    var brightness = slider.value;
+    pixel.setRed(ensureRGB(pixel.getRed() - brightness));
+    pixel.setGreen(ensureRGB(pixel.getGreen() - brightness));
+    pixel.setBlue(ensureRGB(pixel.getBlue() - brightness)); 
+  }
+  var canvasimage = document.getElementById("can2");
+  imageGrey.drawTo(canvasimage);
+}
+  
+  function ensureRGB(rgb) {
+  if(rgb < 0) return 0;
+  if(rgb > 255) return 255;
+  return rgb;
+}
+ 
+function clearCanvas() {
+  ImageCanvas = document.getElementById("can1");
+  ImageCanvas2 = document.getElementById("can2");
+  doClear(ImageCanvas);
+  doClear(ImageCanvas2);
+}
+
+function doClear(canvas) {
+  var context = canvas.getContext("2d");
+  context.clearRect(0,0,canvas.width,canvas.height);
+}
+function reset(){
+  clearCanvas();
+}
+
+function getColor1() {
+  var clrinput = document.getElementById("clrinput1");
+  framecolor1 = clrinput.value;
+}
+
+function getThickness1() {
+  var thicknessinput = document.getElementById("rangeinput1");
+  framethickness1 = thicknessinput.value;
+}
+
+function doWindow() {
+  canvas = document.getElementById("can2");
+  var context = canvas.getContext("2d");
+  
+  context.fillStyle = String(framecolor1);
+  
+  context.fillRect(0, 0, framethickness1, canvas.height);
+  
+  context.fillRect(0, 0, canvas.width, framethickness1);
+  
+  context.fillRect(canvas.width-framethickness1, 0 , framethickness1, canvas.height);
+ 
+  context.fillRect(0, canvas.height -framethickness1, canvas.width,framethickness1);
+  
+  context.fillRect(canvas.width/2 - framethickness1, 0, framethickness1, canvas.height);
+  
+  context.fillRect(0, canvas.height/2 - framethickness1, canvas.width, framethickness1);
+}
+
+function doPic() {
+  var canvasimage = document.getElementById("can2");
+  imageGrey.drawTo(canvasimage);
+  var ctx = canvasimage.getContext("2d");
+  var img = document.getElementById("liz");
+  ctx.drawImage(img,0,0);
+}
+function doPic1() {
+  var canvasimage = document.getElementById("can2");
+  imageGrey.drawTo(canvasimage);
+  var ctx = canvasimage.getContext("2d");
+  var img = document.getElementById("liz1");
+  ctx.drawImage(img,50,50);
+}
+
+function makeInvert(){
+    
+      for (var px of imageGrey.values()){
+        var red = px.getRed();
+        var green = px.getGreen();
+        var blue = px.getBlue();
+        px.setRed(255-red);
+        px.setGreen(255-green);
+        px.setBlue(255-blue);
+      }
+      var canvas = document.getElementById("can2");
+      imageGrey.drawTo(canvas);
+    } 
+
